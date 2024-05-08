@@ -4,7 +4,7 @@ type t =
     | NewLine
     | Header of int
     | Text of string
-    | Star
+    | Star of int
     | List
     | Code 
 
