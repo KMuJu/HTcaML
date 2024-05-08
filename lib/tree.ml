@@ -102,7 +102,47 @@ and header_node builder number =
         | 6 -> Node.Header6 items
         | _ -> Node.Header1 items
     in
-    {builder with indent = 0}, Some (header)
+    builder, Some (header)
+
+and parse_list builder =
+    let () = printf "Parsing---- %d\n" builder.position in
+    let open Node in
+    let rec get_item builder items = 
+        let () = printf "\nRec start: %d\n" builder.position in
+        match builder.t with
+        | Some List -> 
+            let indent = builder.indent in
+            let builder, inline = get_inline (advance builder) false in
+
+            let haschild =
+                match builder.t with
+                | Some (Indent i) -> (i > indent)
+                | _ -> false in
+
+            let builder, inner =
+                if haschild then
+                    let builder = advance builder in
+                    match builder.t with
+                    | Some List ->
+                        let builder, body = parse_list builder in
+                        builder, Some body
+                    | _ -> builder, None
+                else
+                    builder, None in
+            let item = {items = inline; inner} in
+            (
+                (* Only get next list if is on same indent level
+                   Higher indented lists are taken care of*)
+                match builder.t with
+                | Some List when indent = builder.indent -> get_item builder (item::items)
+                | Some Indent i when indent = i -> get_item (advance builder) (item::items)
+                | _ -> builder, List.rev (item::items)
+            )
+        | _ -> builder, List.rev items
+    in
+    let indent = builder.indent in
+    let builder, children = get_item builder [] in
+    builder, {children; indent}
 
 and get_tokens lexer =
     let rec loop lexer l = 
