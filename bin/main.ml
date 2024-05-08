@@ -44,8 +44,23 @@ let tree nodes =
         | HTcaML2.Node.Next -> Fmt.pr "Next\n"
         | Header1 h -> Fmt.pr "Header: %s\n" (HTcaML2.Node.show_paragraph h)
         | Paragraph p -> Fmt.pr "Paragraph: %s\n" (HTcaML2.Node.show_pbody p)
+        | ListBody b -> Fmt.pr "List: %s\n" (HTcaML2.Node.show_list b)
         | _ -> Fmt.pr "IDK\n")
 ;;
 
-let builder = HTcaML2.Tree.init_builder "Tekst\n**bold** *italic*\n\nteskt ti\n# Header" in
+let builder = HTcaML2.Tree.init_builder
+"Tekst
+**bold** *italic*
+
+teskt ti
+# Header
+- Test
+    - TT
+- AA
+    - uu
+    - LKJ
+        - ...
+    - laksj
+        - *09*
+" in
 tree (get_tokens builder);;

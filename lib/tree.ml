@@ -17,8 +17,15 @@ let rec init_builder input =
     { nodes = tokens; position = 0; t; indent = 0; len = List.length tokens}
 
 and advance builder = 
+    (* Adds indent if advancing past indent *)
+    let indent = match builder.t with
+        | Some (Indent i) ->  
+            i 
+        | Some NewLine ->
+            0
+        | _ -> builder.indent in
     let position = builder.position + 1 in
-    { builder with position; t = List.nth builder.nodes position }
+    { builder with position; t = List.nth builder.nodes position; indent}
 
 and next_node builder = 
     match builder.t with
@@ -26,10 +33,12 @@ and next_node builder =
     | Some t ->
         match t with
         | Illegal -> builder, None
-        | Indent i -> { (advance builder) with indent = i }, Some Node.Next
+        | Indent i -> advance builder, Some Node.Next
         | Header h -> header_node builder h
         (* | Header h -> advance builder, Some Next *)
-        | List -> advance builder, Some Next
+        | List -> 
+            let builder, body = parse_list builder in
+            builder, Some (ListBody body)
         | Code -> advance builder, Some Next
         | NewLine -> advance builder, Some Next
         | _ -> parse_paragraph builder
@@ -83,7 +92,9 @@ and get_inline builder newline =
         else builder, items
     in
     let builder, items = loop builder [] in
-    builder, List.rev items
+    match builder.t with
+    | Some NewLine -> advance builder, List.rev items
+    | _ -> builder, List.rev items
 
 and parse_paragraph builder = 
     let indent = builder.indent in
@@ -91,7 +102,6 @@ and parse_paragraph builder =
     builder, Some (Node.Paragraph {items = items; indent = indent})
 
 and header_node builder number =
-    let () = printf "header %d\n" number in
     let builder, items = get_inline builder false in
     let header = match number with
         | 1 -> Node.Header1 items
