@@ -23,7 +23,7 @@ let get s i =
 
 (**Will only check after new line, not in the middle*)
 let is_indent lexer ch =
-    Char.is_whitespace ch && Char.equal (prev_ch lexer) '\n'
+    Char.is_whitespace ch && (Int.equal lexer.position 0 || Char.equal (prev_ch lexer) '\n')
 
 (**Checks if there is no non whitespace char last newline and current pos*)
 let is_first_in_line lexer = 
@@ -41,6 +41,9 @@ let is_first_in_line lexer =
     in
     loop lexer.input (lexer.position -1)
 
+let can_be_header lexer =
+    Int.equal lexer.position 0 || Char.equal (prev_ch lexer) '\n'
+
 let rec next_token lexer = 
     let open Token in
     match lexer.ch with
@@ -49,12 +52,18 @@ let rec next_token lexer =
         (* let () = printf "%c..\n" ch in *)
         match ch with
         | '\n' -> advance lexer, Some (NewLine)
-        | '*' -> advance lexer, Some (Star)
+        | '*' ->
+            let start = lexer.position in
+            let lexer, i = parse_until lexer (fun ch ->
+                match ch with
+                | None -> false
+                | Some ch -> Char.equal '*' ch) in
+            lexer, Some (Star (i - start))
         | '-' when is_list lexer -> advance (advance lexer), Some (List)
         | c when is_indent lexer c -> 
             let lexer, count = skip_whitespace lexer in
             lexer, Some (Indent count)
-        | '#' when is_first_in_line lexer -> is_header lexer
+        | '#' when can_be_header lexer -> is_header lexer
         | '`' -> is_code lexer
         | _ -> parse_text lexer
 (* lexer, Some (Illegal) *)
