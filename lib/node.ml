@@ -11,10 +11,12 @@ type paragraph = inline list
 type list_body = 
     { children: list_item list
     ; indent: int}
+[@@deriving show]
 
 and list_item = 
-    { items: inline list
+    { items: paragraph
     ; inner: list_body option}
+[@@deriving show]
 
 type code_text = 
     | CodeText of string
@@ -45,3 +47,5 @@ let show_paragraph = show_paragraph;;
 let pp_paragraph = pp_paragraph;;
 let show_pbody = show_pbody;;
 let pp_pbody = pp_pbody;;
+let show_list = show_list_body;;
+let pp_list = pp_list_body;;

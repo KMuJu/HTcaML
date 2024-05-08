@@ -7,6 +7,7 @@ type t =
     | Star of int
     | List
     | Code 
+[@@deriving show]
 
 let is_inline_identifier ch =
     match ch with
@@ -14,3 +15,6 @@ let is_inline_identifier ch =
     | '_' -> true
     | '`' -> true
     |  _  -> false
+
+let show = show;;
+let pp = pp;;
