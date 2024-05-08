@@ -2,33 +2,46 @@ type inline =
     | Text of string
     | Bold of string
     | Italic of string
+    | NewLine
+[@@deriving show]
 
 type paragraph = inline list
+[@@deriving show]
 
-type item = paragraph
+type list_body = 
+    { children: list_item list
+    ; indent: int}
+
+and list_item = 
+    { items: inline list
+    ; inner: list_body option}
 
 type code_text = 
-    | Text of string
-    | NewLine
+    | CodeText of string
+    | CodeNewLine
 
-type header = 
-    { items: inline list
-    ; indent: int }
+type pbody =
+    { items: paragraph
+    ; indent: int}
+[@@deriving show]
 
 type t = 
-    | Header1 of header
-    | Header2 of header
-    | Header3 of header
-    | Header4 of header
-    | Header5 of header
-    | Header6 of header
-    | ListBody of 
-        { items: item list
-        ; indent: int }
+    | Next
+    | Header1 of paragraph
+    | Header2 of paragraph
+    | Header3 of paragraph
+    | Header4 of paragraph
+    | Header5 of paragraph
+    | Header6 of paragraph
+    | ListBody of list_body
     | Code of 
-        { items: string * code_text list
-        ; ident: int }
-    | Paragraph of 
-        { items: paragraph list
-        ; ident: int}
+        { code: string * code_text list
+        ; indent: int }
+    | Paragraph of pbody
 
+let show_inline = show_inline;;
+let pp_inline = pp_inline;;
+let show_paragraph = show_paragraph;;
+let pp_paragraph = pp_paragraph;;
+let show_pbody = show_pbody;;
+let pp_pbody = pp_pbody;;
