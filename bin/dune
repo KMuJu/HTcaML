@@ -1,4 +1,4 @@
 (executable
- (public_name HTcaML2)
+ (public_name HTcaML)
  (name main)
- (libraries HTcaML2 fmt))
+ (libraries HTcaML fmt))
