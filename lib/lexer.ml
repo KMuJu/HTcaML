@@ -4,13 +4,14 @@ type t =
     { input : string
     ; position : int
     ; ch: char option
+    ; len: int
     } [@@deriving show]
 
 let init input = 
     if String.is_empty input then
-        {input; position = 0; ch = None}
+        {input; position = 0; ch = None; len = String.length input}
     else
-        {input; position = 0; ch = Some (String.get input 0)}
+        {input; position = 0; ch = Some (String.get input 0); len = String.length input}
 
 let prev_ch lexer =
     String.get lexer.input (lexer.position -1)
@@ -73,7 +74,7 @@ let rec next_token lexer =
     @param lexer
     @return new lexer*)
 and advance lexer = 
-    if lexer.position >= String.length lexer.input - 1 then
+    if lexer.position >= lexer.len - 1 then
         {lexer with position = lexer.position + 1; ch = None}
     else
         let position = lexer.position + 1 in
@@ -135,7 +136,7 @@ and parse_text lexer =
 and is_code lexer =
     let rec loop n = 
         if n >= 3 then true else
-        if lexer.position + n >= (String.length lexer.input) then
+        if lexer.position + n >= (lexer.len) then
             false
         else
             let ch = String.get lexer.input (lexer.position + n) in
