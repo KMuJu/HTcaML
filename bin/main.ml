@@ -42,7 +42,12 @@ let tree nodes =
     List.iter nodes ~f:(fun n ->
         match n with
         | HTcaML2.Node.Next -> Fmt.pr "Next\n"
-        | Header1 h -> Fmt.pr "Header: %s\n" (HTcaML2.Node.show_paragraph h)
+        | Header1 h -> Fmt.pr "Header1: %s\n" (HTcaML2.Node.show_paragraph h)
+        | Header2 h -> Fmt.pr "Header2: %s\n" (HTcaML2.Node.show_paragraph h)
+        | Header3 h -> Fmt.pr "Header3: %s\n" (HTcaML2.Node.show_paragraph h)
+        | Header4 h -> Fmt.pr "Header4: %s\n" (HTcaML2.Node.show_paragraph h)
+        | Header5 h -> Fmt.pr "Header5: %s\n" (HTcaML2.Node.show_paragraph h)
+        | Header6 h -> Fmt.pr "Header6: %s\n" (HTcaML2.Node.show_paragraph h)
         | Paragraph p -> Fmt.pr "Paragraph: %s\n" (HTcaML2.Node.show_pbody p)
         | ListBody b -> Fmt.pr "List: %s\n" (HTcaML2.Node.show_list b)
         | _ -> Fmt.pr "IDK\n")
@@ -62,5 +67,10 @@ teskt ti
         - ...
     - laksj
         - *09*
-" in
+
+## Header2
+
+### Header3
+- Kaer
+    - Hai" in
 tree (get_tokens builder);;

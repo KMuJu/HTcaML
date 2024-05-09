@@ -21,6 +21,7 @@ and advance builder =
     let position = builder.position + 1 in
     { builder with position; t = List.nth builder.nodes position; indent}
 
+(** @return next builder and node*)
 and next_node builder = 
     match builder.t with
     | None -> builder, None
@@ -40,7 +41,7 @@ and next_node builder =
 (** recursivly gets inline from a builder
     @param newline wether to continue on newline token
     @return next builder, list of items*)
-and get_inline builder newline =
+and get_inline builder ~newline =
     let rec loop builder items =
         let builder, items = match builder.t with
             | None -> builder, items
@@ -92,11 +93,11 @@ and get_inline builder newline =
 
 and parse_paragraph builder = 
     let indent = builder.indent in
-    let builder, items = get_inline builder true in
+    let builder, items = get_inline builder ~newline:true in
     builder, Some (Node.Paragraph {items = items; indent = indent})
 
 and header_node builder number =
-    let builder, items = get_inline builder false in
+    let builder, items = get_inline builder ~newline:false in
     let header = match number with
         | 1 -> Node.Header1 items
         | 2 -> Node.Header2 items
@@ -109,14 +110,12 @@ and header_node builder number =
     builder, Some (header)
 
 and parse_list builder =
-    let () = printf "Parsing---- %d\n" builder.position in
     let open Node in
     let rec get_item builder items = 
-        let () = printf "\nRec start: %d\n" builder.position in
         match builder.t with
         | Some List -> 
             let indent = builder.indent in
-            let builder, inline = get_inline (advance builder) false in
+            let builder, inline = get_inline (advance builder) ~newline:false in
 
             let haschild =
                 match builder.t with
