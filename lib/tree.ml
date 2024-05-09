@@ -1,28 +1,22 @@
 open Core
-type t = 
-    { nodes: Node.t list}
 
 type builder =
     { nodes: Token.t list
     ; position: int
     ; t: Token.t option
-    ; indent: int
-    ; len: int}
+    ; indent: int}
 
 let rec init_builder input =
-    let open Lexer in
     let lexer = Lexer.init input in
     let tokens = get_tokens lexer in
     let t = List.nth tokens 0 in
-    { nodes = tokens; position = 0; t; indent = 0; len = List.length tokens}
+    { nodes = tokens; position = 0; t; indent = 0}
 
 and advance builder = 
     (* Adds indent if advancing past indent *)
     let indent = match builder.t with
-        | Some (Indent i) ->  
-            i 
-        | Some NewLine ->
-            0
+        | Some (Indent i) ->  i 
+        | Some NewLine -> 0
         | _ -> builder.indent in
     let position = builder.position + 1 in
     { builder with position; t = List.nth builder.nodes position; indent}
@@ -33,7 +27,7 @@ and next_node builder =
     | Some t ->
         match t with
         | Illegal -> builder, None
-        | Indent i -> advance builder, Some Node.Next
+        | Indent _ -> advance builder, Some Node.Next
         | Header h -> header_node builder h
         (* | Header h -> advance builder, Some Next *)
         | List -> 
