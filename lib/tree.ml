@@ -51,18 +51,20 @@ and get_inline builder ~newline =
                     loop (advance builder) ((Node.Text s)::items)
                 | Star 1 -> 
                     (
-                        match List.nth builder.nodes (builder.position + 1) with
-                        | Some (Text s) -> loop (advance (advance builder)) ((Italic s)::items)
-                        | _ -> loop (advance builder) (items)
+                        let builder = advance builder in
+                        match builder.t with
+                        | Some (Text s) -> loop (advance (advance builder )) ((Italic s)::items)
+                        | _ -> loop builder (items)
                     )
                 | Star 2 -> 
                     (
-                        match List.nth builder.nodes (builder.position + 1) with
-                        | Some (Text s) -> loop (advance (advance builder)) ((Bold s)::items)
-                        | _ -> loop (advance builder) (items)
+                        let builder = advance builder in
+                        match builder.t with
+                        | Some (Text s) -> loop (advance (advance builder )) ((Bold s)::items)
+                        | _ -> loop builder (items)
                     )
                 | Header _ -> 
-                    if Int.equal (List.length items) 0 then
+                    if List.is_empty items then
                         loop (advance builder) items
                     else
                         builder, items
@@ -72,7 +74,6 @@ and get_inline builder ~newline =
             (* If next token is NewLine and is not double NewLine, will loop further*)
             match builder.t with
             | None -> builder, items
-            (* | _ -> builder, items *)
             | Some t -> 
                 match t with
                 | NewLine -> 
@@ -87,9 +88,10 @@ and get_inline builder ~newline =
         else builder, items
     in
     let builder, items = loop builder [] in
+    let items = List.rev items in
     match builder.t with
-    | Some NewLine -> advance builder, List.rev items
-    | _ -> builder, List.rev items
+    | Some NewLine -> advance builder, items
+    | _ -> builder, items
 
 and parse_paragraph builder = 
     let indent = builder.indent in
@@ -122,6 +124,7 @@ and parse_list builder =
                 | Some (Indent i) -> (i > indent)
                 | _ -> false in
 
+            (*If there is a indented list, parse that and put that as the body*)
             let builder, inner =
                 if haschild then
                     let builder = advance builder in
