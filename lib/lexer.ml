@@ -85,8 +85,9 @@ and advance lexer =
     *)
 and skip_whitespace lexer =
     let line = lexer.input in
+    let len = lexer.len in
     let rec count i c =
-        if String.is_empty line then
+        if i >= len then
             i, c
         else if Char.is_whitespace (String.get line i) then
             let ch = String.get line i in
